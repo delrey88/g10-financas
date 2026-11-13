@@ -1,10 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>G10 Finanças</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,7 +14,7 @@
         }
 
         .container {
-            max-width: 600px;
+            max-width: 900px;
             margin: auto;
             background: white;
             padding: 25px;
@@ -24,6 +24,11 @@
         h1 {
             color: #174c38;
             text-align: center;
+        }
+
+        h2 {
+            color: #174c38;
+            margin-top: 25px;
         }
 
         label {
@@ -58,12 +63,64 @@
             background: #edf7f0;
             border-radius: 6px;
         }
+
+        .tabela-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #174c38;
+            color: white;
+        }
+
+        .receita {
+            color: #16803c;
+            font-weight: bold;
+        }
+
+        .despesa {
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        #mensagemHistorico {
+            color: #666;
+            text-align: center;
+            padding: 15px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+        }
     </style>
 </head>
+
 <body>
 
 <div class="container">
+
     <h1>G10 Finanças</h1>
+
     <h2>Cadastro de movimentações</h2>
 
     <form id="formMovimentacao">
@@ -76,12 +133,21 @@
         </select>
 
         <label for="descricao">Descrição</label>
-        <input type="text" id="descricao"
-               placeholder="Ex.: Venda de produtos" required>
+        <input
+            type="text"
+            id="descricao"
+            placeholder="Ex.: Venda de produtos"
+            required
+        >
 
         <label for="valor">Valor (R$)</label>
-        <input type="number" id="valor"
-               min="0.01" step="0.01" required>
+        <input
+            type="number"
+            id="valor"
+            min="0.01"
+            step="0.01"
+            required
+        >
 
         <label for="data">Data</label>
         <input type="date" id="data" required>
@@ -97,21 +163,131 @@
         </select>
 
         <button type="submit">Cadastrar movimentação</button>
+
     </form>
 
     <div id="resultado" aria-live="polite">
         Nenhuma movimentação cadastrada.
     </div>
+
+    <h2>Histórico financeiro</h2>
+
+    <div class="tabela-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Descrição</th>
+                    <th>Valor</th>
+                    <th>Data</th>
+                    <th>Categoria</th>
+                </tr>
+            </thead>
+
+            <tbody id="listaMovimentacoes"></tbody>
+        </table>
+    </div>
+
+    <p id="mensagemHistorico">
+        Nenhuma movimentação registrada até o momento.
+    </p>
+
 </div>
 
 <script>
     const formulario = document.getElementById("formMovimentacao");
     const resultado = document.getElementById("resultado");
+    const listaMovimentacoes = document.getElementById("listaMovimentacoes");
+    const mensagemHistorico = document.getElementById("mensagemHistorico");
 
+    const CHAVE_STORAGE = "g10FinancasMovimentacoes";
+
+    let movimentacoes = [];
+
+    // Recupera os registros salvos no navegador.
+    try {
+        const dadosSalvos = localStorage.getItem(CHAVE_STORAGE);
+
+        if (dadosSalvos) {
+            const dados = JSON.parse(dadosSalvos);
+
+            if (Array.isArray(dados)) {
+                movimentacoes = dados;
+            }
+        }
+    } catch (erro) {
+        console.error("Erro ao recuperar movimentações:", erro);
+        resultado.textContent =
+            "Não foi possível recuperar os registros armazenados.";
+    }
+
+    // Formata valores para moeda brasileira.
+    function formatarMoeda(valor) {
+        return Number(valor).toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL"
+        });
+    }
+
+    // Formata a data sem alterar o dia por causa do fuso horário.
+    function formatarData(data) {
+        const partes = data.split("-");
+
+        if (partes.length !== 3) {
+            return data;
+        }
+
+        return partes[2] + "/" + partes[1] + "/" + partes[0];
+    }
+
+    // Atualiza a tabela com as movimentações cadastradas.
+    function atualizarHistorico() {
+        listaMovimentacoes.replaceChildren();
+
+        if (movimentacoes.length === 0) {
+            mensagemHistorico.style.display = "block";
+            return;
+        }
+
+        mensagemHistorico.style.display = "none";
+
+        movimentacoes.forEach(function(movimentacao) {
+            const linha = document.createElement("tr");
+
+            const colunaTipo = document.createElement("td");
+            colunaTipo.textContent = movimentacao.tipo;
+            colunaTipo.className =
+                movimentacao.tipo === "Receita" ? "receita" : "despesa";
+
+            const colunaDescricao = document.createElement("td");
+            colunaDescricao.textContent = movimentacao.descricao;
+
+            const colunaValor = document.createElement("td");
+            colunaValor.textContent = formatarMoeda(movimentacao.valor);
+
+            const colunaData = document.createElement("td");
+            colunaData.textContent = formatarData(movimentacao.data);
+
+            const colunaCategoria = document.createElement("td");
+            colunaCategoria.textContent = movimentacao.categoria;
+
+            linha.appendChild(colunaTipo);
+            linha.appendChild(colunaDescricao);
+            linha.appendChild(colunaValor);
+            linha.appendChild(colunaData);
+            linha.appendChild(colunaCategoria);
+
+            listaMovimentacoes.appendChild(linha);
+        });
+    }
+
+    // Cadastra uma nova movimentação.
     formulario.addEventListener("submit", function(event) {
         event.preventDefault();
 
-        if (!formulario.reportValidity()) return;
+        if (!formulario.reportValidity()) {
+            return;
+        }
 
         const tipo = document.getElementById("tipo").value;
         const descricao = document.getElementById("descricao").value.trim();
@@ -120,18 +296,49 @@
         const categoria = document.getElementById("categoria").value;
 
         if (!descricao || !Number.isFinite(valor) || valor <= 0) {
-            resultado.textContent = "Informe uma descrição e um valor válido.";
+            resultado.textContent =
+                "Informe uma descrição e um valor válido.";
+            return;
+        }
+
+        const novaMovimentacao = {
+            tipo: tipo,
+            descricao: descricao,
+            valor: valor,
+            data: data,
+            categoria: categoria
+        };
+
+        movimentacoes.push(novaMovimentacao);
+
+        // Salva os registros no armazenamento local do navegador.
+        try {
+            localStorage.setItem(
+                CHAVE_STORAGE,
+                JSON.stringify(movimentacoes)
+            );
+        } catch (erro) {
+            movimentacoes.pop();
+
+            resultado.textContent =
+                "Não foi possível salvar a movimentação no navegador.";
+            console.error("Erro ao salvar movimentação:", erro);
             return;
         }
 
         resultado.textContent =
             tipo + " cadastrada: " + descricao +
-            " | R$ " + valor.toFixed(2) +
-            " | " + data +
+            " | " + formatarMoeda(valor) +
+            " | " + formatarData(data) +
             " | " + categoria;
 
+        atualizarHistorico();
         formulario.reset();
     });
+
+    // Exibe os registros existentes ao abrir a página.
+    atualizarHistorico();
+
 </script>
 
 </body>
