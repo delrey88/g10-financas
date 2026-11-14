@@ -1,0 +1,354 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>G10 Finanças</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    header {
+      background: #142d4e;
+      color: white;
+      padding: 24px 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 26px;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .resumo {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .card, .painel {
+      background: white;
+      padding: 22px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px #0000000d;
+    }
+
+    .card h2 {
+      font-size: 15px;
+      color: #475569;
+      margin-top: 0;
+    }
+
+    .valor {
+      font-size: 25px;
+      font-weight: bold;
+    }
+
+    .receita { color: #15803d; }
+    .despesa { color: #b91c1c; }
+
+    .conteudo {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 20px;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin: 14px 0 6px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 7px;
+      font-size: 16px;
+    }
+
+    input, select {
+      border: 1px solid #94a3b8;
+      background: white;
+      color: #1e293b;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      background: #1762a5;
+      color: white;
+      margin-top: 16px;
+    }
+
+    button:hover {
+      background: #104b80;
+    }
+
+    button:focus-visible, input:focus-visible,
+    select:focus-visible {
+      outline: 3px solid #eab308;
+      outline-offset: 3px;
+    }
+
+    .contraste {
+      width: auto;
+      margin: 0;
+      background: #ffffff;
+      color: #142d4e;
+    }
+
+    .movimentacao {
+      padding: 14px 0;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .vazio {
+      color: #475569;
+      padding: 15px 0;
+    }
+
+    .alto-contraste {
+      background: #000;
+      color: #fff;
+    }
+
+    .alto-contraste .card,
+    .alto-contraste .painel {
+      background: #000;
+      color: #fff;
+      border: 2px solid #fff;
+    }
+
+    .alto-contraste .card h2,
+    .alto-contraste .vazio {
+      color: #fff;
+    }
+
+    .alto-contraste input,
+    .alto-contraste select {
+      background: #000;
+      color: #fff;
+      border: 2px solid #fff;
+    }
+
+    .alto-contraste .movimentacao {
+      border-color: #fff;
+    }
+
+    @media (max-width: 700px) {
+      .conteudo {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div>
+    <h1>G10 Finanças</h1>
+    <p>Controle financeiro pessoal</p>
+  </div>
+
+  <button class="contraste" id="botaoContraste"
+    onclick="alternarContraste()"
+    aria-pressed="false">
+    Alto contraste
+  </button>
+</header>
+
+<main>
+  <section class="resumo" aria-label="Resumo financeiro">
+
+    <div class="card">
+      <h2>Saldo disponível</h2>
+      <div class="valor" id="saldo">R$ 0,00</div>
+    </div>
+
+    <div class="card">
+      <h2>Total de receitas</h2>
+      <div class="valor receita" id="receitas">R$ 0,00</div>
+    </div>
+
+    <div class="card">
+      <h2>Total de despesas</h2>
+      <div class="valor despesa" id="despesas">R$ 0,00</div>
+    </div>
+
+  </section>
+
+  <section class="conteudo">
+
+    <div class="painel">
+      <h2>Nova movimentação</h2>
+
+      <form id="formulario">
+
+        <label for="descricao">Descrição</label>
+        <input id="descricao" type="text"
+          placeholder="Ex.: Salário" required>
+
+        <label for="tipo">Tipo</label>
+        <select id="tipo" required>
+          <option value="receita">Receita</option>
+          <option value="despesa">Despesa</option>
+        </select>
+
+        <label for="valor">Valor (R$)</label>
+        <input id="valor" type="number"
+          min="0.01" step="0.01" required
+          placeholder="Ex.: 1500.00">
+
+        <label for="categoria">Categoria</label>
+        <select id="categoria" required>
+          <option value="Salário">Salário</option>
+          <option value="Alimentação">Alimentação</option>
+          <option value="Moradia">Moradia</option>
+          <option value="Transporte">Transporte</option>
+          <option value="Outros">Outros</option>
+        </select>
+
+        <button type="submit">Cadastrar movimentação</button>
+      </form>
+
+      <p id="mensagem" role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="painel">
+      <h2>Histórico financeiro</h2>
+      <div id="historico" aria-live="polite">
+        <p class="vazio">Carregando movimentações...</p>
+      </div>
+    </div>
+
+  </section>
+</main>
+
+<script>
+  const movimentacoes = [
+    {
+      descricao: "Salário",
+      tipo: "receita",
+      valor: 3500,
+      categoria: "Salário"
+    },
+    {
+      descricao: "Conta de energia",
+      tipo: "despesa",
+      valor: 180,
+      categoria: "Moradia"
+    },
+    {
+      descricao: "Supermercado",
+      tipo: "despesa",
+      valor: 450,
+      categoria: "Alimentação"
+    }
+  ];
+
+  const moeda = valor =>
+    valor.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL"
+    });
+
+  function atualizarPainel() {
+    const receitas = movimentacoes
+      .filter(item => item.tipo === "receita")
+      .reduce((total, item) => total + item.valor, 0);
+
+    const despesas = movimentacoes
+      .filter(item => item.tipo === "despesa")
+      .reduce((total, item) => total + item.valor, 0);
+
+    document.getElementById("receitas").textContent = moeda(receitas);
+    document.getElementById("despesas").textContent = moeda(despesas);
+    document.getElementById("saldo").textContent = moeda(receitas - despesas);
+
+    const historico = document.getElementById("historico");
+    historico.replaceChildren();
+
+    movimentacoes.slice().reverse().forEach(item => {
+      const linha = document.createElement("div");
+      linha.className = "movimentacao";
+
+      const descricao = document.createElement("span");
+      descricao.textContent = item.descricao + " — " + item.categoria;
+
+      const valor = document.createElement("strong");
+      valor.textContent =
+        (item.tipo === "receita" ? "+ " : "- ") + moeda(item.valor);
+      valor.className = item.tipo;
+
+      linha.append(descricao, valor);
+      historico.appendChild(linha);
+    });
+  }
+
+  document.getElementById("formulario")
+    .addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const descricao = document.getElementById("descricao").value.trim();
+      const tipo = document.getElementById("tipo").value;
+      const valor = Number(document.getElementById("valor").value);
+      const categoria = document.getElementById("categoria").value;
+
+      if (!descricao || !Number.isFinite(valor) || valor <= 0) {
+        document.getElementById("mensagem").textContent =
+          "Preencha os campos corretamente.";
+        return;
+      }
+
+      movimentacoes.push({ descricao, tipo, valor, categoria });
+
+      atualizarPainel();
+      this.reset();
+
+      document.getElementById("mensagem").textContent =
+        "Movimentação cadastrada com sucesso!";
+    });
+
+  function alternarContraste() {
+    const ativo = document.body.classList.toggle("alto-contraste");
+
+    const botao = document.getElementById("botaoContraste");
+    botao.setAttribute("aria-pressed", String(ativo));
+    botao.textContent = ativo ? "Desativar alto contraste" : "Alto contraste";
+  }
+
+  atualizarPainel();
+</script>
+
+</body>
+</html>
