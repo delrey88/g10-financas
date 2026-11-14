@@ -1,9 +1,14 @@
+
 {
   "name": "g10-financas",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "coverage": "npx c8 --include=src/movimentacoes.js node --test"
+  },
+  "devDependencies": {
+    "c8": "^10.1.3"
   }
 }
