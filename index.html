@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -110,7 +109,8 @@
       background: #104b80;
     }
 
-    button:focus-visible, input:focus-visible,
+    button:focus-visible,
+    input:focus-visible,
     select:focus-visible {
       outline: 3px solid #eab308;
       outline-offset: 3px;
@@ -255,26 +255,39 @@
 </main>
 
 <script>
-  const movimentacoes = [
-    {
-      descricao: "Salário",
-      tipo: "receita",
-      valor: 3500,
-      categoria: "Salário"
-    },
-    {
-      descricao: "Conta de energia",
-      tipo: "despesa",
-      valor: 180,
-      categoria: "Moradia"
-    },
-    {
-      descricao: "Supermercado",
-      tipo: "despesa",
-      valor: 450,
-      categoria: "Alimentação"
-    }
-  ];
+  // Recuperação das movimentações armazenadas
+  const dadosSalvos = localStorage.getItem("g10_movimentacoes");
+
+  let movimentacoes = dadosSalvos
+    ? JSON.parse(dadosSalvos)
+    : [
+        {
+          descricao: "Salário",
+          tipo: "receita",
+          valor: 3500,
+          categoria: "Salário"
+        },
+        {
+          descricao: "Conta de energia",
+          tipo: "despesa",
+          valor: 180,
+          categoria: "Moradia"
+        },
+        {
+          descricao: "Supermercado",
+          tipo: "despesa",
+          valor: 450,
+          categoria: "Alimentação"
+        }
+      ];
+
+  // Salva os dados iniciais na primeira utilização
+  if (!dadosSalvos) {
+    localStorage.setItem(
+      "g10_movimentacoes",
+      JSON.stringify(movimentacoes)
+    );
+  }
 
   const moeda = valor =>
     valor.toLocaleString("pt-BR", {
@@ -282,6 +295,7 @@
       currency: "BRL"
     });
 
+  // Atualização do painel financeiro
   function atualizarPainel() {
     const receitas = movimentacoes
       .filter(item => item.tipo === "receita")
@@ -297,6 +311,14 @@
 
     const historico = document.getElementById("historico");
     historico.replaceChildren();
+
+    if (movimentacoes.length === 0) {
+      const mensagem = document.createElement("p");
+      mensagem.className = "vazio";
+      mensagem.textContent = "Nenhuma movimentação cadastrada.";
+      historico.appendChild(mensagem);
+      return;
+    }
 
     movimentacoes.slice().reverse().forEach(item => {
       const linha = document.createElement("div");
@@ -315,6 +337,7 @@
     });
   }
 
+  // Cadastro e armazenamento das movimentações
   document.getElementById("formulario")
     .addEventListener("submit", function(event) {
       event.preventDefault();
@@ -330,23 +353,38 @@
         return;
       }
 
-      movimentacoes.push({ descricao, tipo, valor, categoria });
+      movimentacoes.push({
+        descricao,
+        tipo,
+        valor,
+        categoria
+      });
+
+      // Persistência dos dados no navegador
+      localStorage.setItem(
+        "g10_movimentacoes",
+        JSON.stringify(movimentacoes)
+      );
 
       atualizarPainel();
       this.reset();
 
       document.getElementById("mensagem").textContent =
-        "Movimentação cadastrada com sucesso!";
+        "Movimentação cadastrada e salva com sucesso!";
     });
 
+  // Recurso de acessibilidade: alto contraste
   function alternarContraste() {
     const ativo = document.body.classList.toggle("alto-contraste");
 
     const botao = document.getElementById("botaoContraste");
     botao.setAttribute("aria-pressed", String(ativo));
-    botao.textContent = ativo ? "Desativar alto contraste" : "Alto contraste";
+    botao.textContent = ativo
+      ? "Desativar alto contraste"
+      : "Alto contraste";
   }
 
+  // Inicialização do painel com os dados armazenados
   atualizarPainel();
 </script>
 
