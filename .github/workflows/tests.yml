@@ -1,3 +1,4 @@
+
 name: Testes automatizados
 
 on:
@@ -19,5 +20,8 @@ jobs:
         with:
           node-version: 20
 
-      - name: Executar testes
-        run: npm test
+      - name: Instalar dependências
+        run: npm install
+
+      - name: Executar testes e medir cobertura
+        run: npm run coverage
