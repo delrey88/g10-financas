@@ -1,3 +1,4 @@
+
 import test from "node:test";
 import assert from "node:assert";
 import { validarMovimentacao } from "../src/movimentacoes.js";
@@ -44,6 +45,18 @@ test("não deve aceitar uma descrição vazia", () => {
     descricao: " ",
     valor: 50,
     data: "2026-11-13",
+    categoria: "Moradia"
+  };
+
+  assert.strictEqual(validarMovimentacao(movimentacao), false);
+});
+
+test("não deve aceitar um valor igual a zero", () => {
+  const movimentacao = {
+    tipo: "despesa",
+    descricao: "Conta de água",
+    valor: 0,
+    data: "2026-11-14",
     categoria: "Moradia"
   };
 
